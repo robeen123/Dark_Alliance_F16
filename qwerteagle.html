@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>أداة استنساخ الويب المتقدمة</title>
+    <link rel="stylesheet" href="assets/css/main.css">
+    <link rel="stylesheet" href="libs/font-awesome/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- شريط التنقل -->
+        <nav class="navbar">
+            <div class="navbar-brand">
+                <i class="fas fa-clone"></i>
+                <h1>أداة استنساخ الويب</h1>
+            </div>
+            <div class="navbar-actions">
+                <button id="settings-btn" class="btn-icon">
+                    <i class="fas fa-cog"></i>
+                </button>
+                <button id="help-btn" class="btn-icon">
+                    <i class="fas fa-question-circle"></i>
+                </button>
+            </div>
+        </nav>
+
+        <!-- لوحة التحكم الرئيسية -->
+        <div class="main-panel">
+            <!-- قسم الإدخال -->
+            <div class="input-section">
+                <div class="url-input-container">
+                    <input type="url" id="url-input" placeholder="أدخل رابط الموقع..." required>
+                    <button id="clone-btn" class="btn-primary">
+                        <i class="fas fa-copy"></i> استنساخ
+                    </button>
+                </div>
+                
+                <div class="advanced-options">
+                    <div class="option-group">
+                        <label>
+                            <input type="checkbox" id="include-assets" checked>
+                            تضمين الأصول (صور، ملفات)
+                        </label>
+                    </div>
+                    <div class="option-group">
+                        <label>
+                            <input type="checkbox" id="include-js" checked>
+                            تضمين الجافاسكريبت
+                        </label>
+                    </div>
+                    <div class="option-group">
+                        <label>
+                            <input type="checkbox" id="scan-secrets" checked>
+                            البحث عن بيانات سرية
+                        </label>
+                    </div>
+                    <div class="option-group">
+                        <label>عمق الاستنساخ:</label>
+                        <select id="depth-select">
+                            <option value="1">المستوى الأول</option>
+                            <option value="2">مستويين</option>
+                            <option value="3">ثلاثة مستويات</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- مؤشر التقدم -->
+            <div id="progress-section" class="progress-section hidden">
+                <div class="progress-bar">
+                    <div id="progress-fill" class="progress-fill"></div>
+                </div>
+                <div id="status-message" class="status-message">
+                    جاهز للبدء...
+                </div>
+                <button id="cancel-btn" class="btn-danger">
+                    <i class="fas fa-times"></i> إلغاء
+                </button>
+            </div>
+
+            <!-- نتائج الاستنساخ -->
+            <div id="result-section" class="result-section hidden">
+                <div class="result-header">
+                    <h2 id="page-title">عنوان الصفحة</h2>
+                    <a id="page-url" href="#" target="_blank">رابط الصفحة</a>
+                    <span id="clone-time" class="time-stamp"></span>
+                </div>
+
+                <!-- تبويبات النتائج -->
+                <div class="results-tabs">
+                    <div class="tabs-header">
+                        <button class="tab-btn active" data-tab="preview">
+                            <i class="fas fa-eye"></i> معاينة
+                        </button>
+                        <button class="tab-btn" data-tab="html">
+                            <i class="fas fa-code"></i> HTML
+                        </button>
+                        <button class="tab-btn" data-tab="assets">
+                            <i class="fas fa-file-image"></i> الأصول
+                        </button>
+                        <button class="tab-btn" data-tab="analysis">
+                            <i class="fas fa-chart-bar"></i> التحليل
+                        </button>
+                        <button class="tab-btn" data-tab="secrets">
+                            <i class="fas fa-lock"></i> البيانات السرية
+                        </button>
+                    </div>
+
+                    <div class="tabs-content">
+                        <!-- معاينة الصفحة -->
+                        <div id="preview-tab" class="tab-content active">
+                            <iframe id="page-preview" sandbox="allow-same-origin"></iframe>
+                        </div>
+
+                        <!-- كود HTML -->
+                        <div id="html-tab" class="tab-content">
+                            <div class="code-toolbar">
+                                <button id="copy-html" class="btn-small">
+                                    <i class="fas fa-copy"></i> نسخ
+                                </button>
+                            </div>
+                            <pre id="html-content"><code class="language-html"></code></pre>
+                        </div>
+
+                        <!-- الأصول -->
+                        <div id="assets-tab" class="tab-content">
+                            <div class="assets-grid">
+                                <div class="asset-category">
+                                    <h3><i class="fas fa-image"></i> الصور</h3>
+                                    <div id="images-container" class="assets-container"></div>
+                                </div>
+                                <div class="asset-category">
+                                    <h3><i class="fas fa-file-css"></i> ملفات CSS</h3>
+                                    <div id="css-container" class="assets-container"></div>
+                                </div>
+                                <div class="asset-category">
+                                    <h3><i class="fas fa-file-code"></i> ملفات JS</h3>
+                                    <div id="js-container" class="assets-container"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- التحليل -->
+                        <div id="analysis-tab" class="tab-content">
+                            <div class="analysis-cards">
+                                <div class="analysis-card">
+                                    <h3><i class="fas fa-search"></i> تحليل SEO</h3>
+                                    <div class="score-meter">
+                                        <div class="score-fill" id="seo-score"></div>
+                                        <span class="score-text" id="seo-score-text">0%</span>
+                                    </div>
+                                    <div id="seo-issues" class="issues-list"></div>
+                                </div>
+                                <div class="analysis-card">
+                                    <h3><i class="fas fa-tachometer-alt"></i> أداء الصفحة</h3>
+                                    <div class="stats-grid">
+                                        <div class="stat-item">
+                                            <span class="stat-value" id="page-size">0 KB</span>
+                                            <span class="stat-label">حجم الصفحة</span>
+                                        </div>
+                                        <div class="stat-item">
+                                            <span class="stat-value" id="load-time">0 ثانية</span>
+                                            <span class="stat-label">زمن التحميل</span>
+                                        </div>
+                                        <div class="stat-item">
+                                            <span class="stat-value" id="requests-count">0</span>
+                                            <span class="stat-label">عدد الطلبات</span>
+                                        </div>
+                                    </div>
+                                    <div id="performance-suggestions" class="suggestions-list"></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- البيانات السرية -->
+                        <div id="secrets-tab" class="tab-content">
+                            <div class="secrets-container">
+                                <div class="secrets-category">
+                                    <h3><i class="fas fa-key"></i> مفاتيح API</h3>
+                                    <div id="api-keys-list" class="secrets-list"></div>
+                                </div>
+                                <div class="secrets-category">
+                                    <h3><i class="fas fa-user-secret"></i> بيانات الاعتماد</h3>
+                                    <div id="credentials-list" class="secrets-list"></div>
+                                </div>
+                                <div class="secrets-category">
+                                    <h3><i class="fas fa-database"></i> بيانات التخزين</h3>
+                                    <div id="storage-data" class="secrets-list"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- أدوات التصدير -->
+                <div class="export-actions">
+                    <button id="export-pdf" class="btn-outline">
+                        <i class="fas fa-file-pdf"></i> PDF
+                    </button>
+                    <button id="export-html" class="btn-outline">
+                        <i class="fas fa-file-code"></i> HTML
+                    </button>
+                    <button id="export-json" class="btn-outline">
+                        <i class="fas fa-file-alt"></i> JSON
+                    </button>
+                    <button id="export-zip" class="btn-primary">
+                        <i class="fas fa-file-archive"></i> ZIP
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- نافذة الإعدادات -->
+        <div id="settings-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-cog"></i> الإعدادات</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="setting-item">
+                        <label>اللغة:</label>
+                        <select id="language-select">
+                            <option value="ar">العربية</option>
+                            <option value="en">English</option>
+                        </select>
+                    </div>
+                    <div class="setting-item">
+                        <label>
+                            <input type="checkbox" id="dark-mode-toggle">
+                            الوضع الداكن
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label>
+                            <input type="checkbox" id="auto-scan-toggle" checked>
+                            المسح التلقائي للبيانات السرية
+                        </label>
+                    </div>
+                    <div class="setting-item">
+                        <label>
+                            <input type="checkbox" id="save-history-toggle" checked>
+                            حفظ سجل الاستنساخ
+                        </label>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button id="save-settings" class="btn-primary">حفظ</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- نافذة المساعدة -->
+        <div id="help-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3><i class="fas fa-question-circle"></i> المساعدة</h3>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="help-section">
+                        <h4>كيفية الاستخدام:</h4>
+                        <ol>
+                            <li>أدخل رابط الموقع في حقل الإدخال</li>
+                            <li>اضبط خيارات الاستنساخ حسب الحاجة</li>
+                            <li>انقر على زر "استنساخ"</li>
+                            <li>انتظر حتى تكتمل العملية</li>
+                            <li>استعرض النتائج في الأقسام المختلفة</li>
+                            <li>قم بتصدير النتائج بالصيغة المطلوبة</li>
+                        </ol>
+                    </div>
+                    <div class="help-section">
+                        <h4>الميزات:</h4>
+                        <ul>
+                            <li>استنساخ كامل لصفحات الويب</li>
+                            <li>تحليل SEO والأداء</li>
+                            <li>كشف البيانات السرية والمخفية</li>
+                            <li>تصدير متعدد الصيغ</li>
+                            <li>واجهة سهلة الاستخدام</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- المكتبات -->
+    <script src="libs/jsPDF/jspdf.min.js"></script>
+    <script src="libs/html2canvas/html2canvas.min.js"></script>
+    <script src="libs/JSZip/jszip.min.js"></script>
+    <script src="libs/FileSaver/FileSaver.min.js"></script>
+    <script src="libs/DOMPurify/purify.min.js"></script>
+    <script src="assets/js/main.js"></script>
+</body>
+</html>
